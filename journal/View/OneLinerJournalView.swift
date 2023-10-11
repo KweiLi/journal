@@ -45,10 +45,10 @@ struct OneLinerJournalView: View {
 
 struct OneLinerJournalView_Previews: PreviewProvider {
     static var previews: some View {
-        OneLinerJournalView()
-            .environmentObject(JournalManager())
+        ForEach(ColorScheme.allCases, id: \.self) {
+            JournalHomeView().preferredColorScheme($0)
+                .environmentObject(JournalManager())
+
+        }
     }
 }
-
-
-

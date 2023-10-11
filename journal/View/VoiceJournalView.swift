@@ -21,29 +21,25 @@ struct VoiceJournalView: View {
     @State var transcribedText: String = ""
     
     var body: some View {
+        
+        ZStack{
+            Color.white
+                .ignoresSafeArea()
+
             VStack {
-                VStack{
-                    HStack{
-                        Text("Voice Journal")
-                            .font(.title2)
-                            .fontWeight(.bold)
-                    }
-                    .padding(.bottom, 5)
-                    
-                    Text("Captures thoughts and emotions effortlessly.")
-                        .font(.subheadline)
-                }
-                .frame(maxWidth: .infinity)
-                .padding()
+                
+                JournalHeaderView(journalType: "Voice Journal", journalTypeDescription: "Captures thoughts and emotions effortlessly.")
+
                                                 
                 Text(Date(), style: .date)
                     .font(.title3)
+                    .foregroundColor(.black)
                     .fontWeight(.bold)
                                 
                 Image("voicejournalimage")
                     .resizable()
                     .scaledToFit()
-                    .frame(width: 200, height: 200, alignment: .center)
+                    .frame(width: 180, height: 180, alignment: .center)
                     .clipShape(Circle())
                     .padding()
                                 
@@ -53,26 +49,45 @@ struct VoiceJournalView: View {
                     if toggleOn {
                         Text("Public")
                             .font(.subheadline)
+                            .foregroundColor(.black)
                     } else {
                         Text("Private")
                             .font(.subheadline)
+                            .foregroundColor(.black)
                     }
                 }
                 .padding(.horizontal)
                                 
                 VStack {
-                    RecordingsList()
-                        .environmentObject(audioRecorderManager)
+                    ScrollView {
+                        VStack {
+                            ForEach(audioRecorderManager.recordings, id: \.createdAt) { recording in
+                                RecordingRow(audioURL: recording.fileURL)
+                                    .padding()
+                                    .background(Color.purple.opacity(0.3).clipShape(RoundedRectangle(cornerRadius: 10)))
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 10)
+                                            .stroke(Color.white, lineWidth: 2)
+                                    )
+                                    .padding()
+                            }
+                        }
+                    }
+                    .environmentObject(audioRecorderManager)
+                    
+                    Spacer()
                     
                     if audioRecorderManager.recording == false {
                         Button(action: {self.audioRecorderManager.startRecording()}) {
-                            Image(systemName: "circle.fill")
+                            Image(systemName: "mic")
                                 .resizable()
-                                .aspectRatio(contentMode: .fill)
-                                .frame(width: 70, height: 70)
-                                .clipped()
-                                .foregroundColor(.red)
-                                .padding(.bottom, 40)
+                                .aspectRatio(contentMode: .fit)
+                                .frame(width: 40, height: 40)
+                                .foregroundColor(.white)
+                                .padding(10)  // Adjust this value to increase or decrease the space
+                                .background(Color.green)
+                                .clipShape(Circle())
+                                .padding([.top,.bottom], 20)
                         }
                     } else {
                         Button(action: {
@@ -91,24 +106,32 @@ struct VoiceJournalView: View {
                                 }
                             }
                         }) {
-                            Image(systemName: "stop.fill")
+                            Image(systemName: "mic.fill")
                                 .resizable()
-                                .aspectRatio(contentMode: .fill)
-                                .frame(width: 70, height: 70)
-                                .clipped()
-                                .foregroundColor(.red)
-                                .padding(.bottom, 40)
+                                .aspectRatio(contentMode: .fit)
+                                .frame(width: 40, height: 40)
+                                .foregroundColor(.white)
+                                .padding(10)  // Adjust this value to increase or decrease the space
+                                .background(Color.red)
+                                .clipShape(Circle())
+                                .padding([.top,.bottom], 20)
                         }
                     }
                 }
-                
+            }
         }
+        
+
     }
 }
 
 struct VoiceJournalView_Previews: PreviewProvider {
     static var previews: some View {
-        VoiceJournalView()
+        ForEach(ColorScheme.allCases, id: \.self) {
+            JournalHomeView().preferredColorScheme($0)
+                .environmentObject(JournalManager())
+
+        }
     }
 }
 

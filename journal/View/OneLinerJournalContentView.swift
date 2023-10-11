@@ -47,6 +47,7 @@ struct OneLinerJounalContentView: View {
                 Text("Pick journal type: \(journalTags[selectedTag])")
                     .font(.subheadline)
                     .fontWeight(.bold)
+                    .foregroundColor(.black)
                 
                 HStack {
                     Button(action: {
@@ -129,9 +130,12 @@ struct OneLinerJounalContentView: View {
                     if journalPublishIndicator {
                         Text("Public")
                             .font(.subheadline)
+                            .foregroundColor(.black)
+
                     } else {
                         Text("Private")
                             .font(.subheadline)
+                            .foregroundColor(.black)
                     }
                 }
                 .padding(.horizontal)

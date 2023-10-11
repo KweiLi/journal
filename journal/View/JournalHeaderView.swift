@@ -17,6 +17,7 @@ struct JournalHeaderView: View {
             HStack{
                 Text(journalType)
                     .font(.headline)
+                    .foregroundColor(.black)
             }
             .padding(.bottom, 5)
             
@@ -24,6 +25,7 @@ struct JournalHeaderView: View {
                 Spacer()
                 Text(journalTypeDescription)
                     .font(.caption)
+                    .foregroundColor(.black)
                 Spacer()
             }
         }
