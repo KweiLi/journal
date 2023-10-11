@@ -11,142 +11,97 @@ import AVFoundation
 import Speech
 
 struct VoiceJournalView: View {
-    @ObservedObject var audioRecorder = AudioRecorder()
-    @State var transcribedText: String = ""
+    @StateObject var audioRecorderManager = AudioRecorder()
+    private let journalManager = JournalManager()
+
+    @State var journalTitle: String = "My Voice Journal"
+    @State var journalText: String = "Today's thoughts."
     @State var toggleOn: Bool = false
     
-    @State private var selectedTab = 0
-
+    @State var transcribedText: String = ""
+    
     var body: some View {
-        VStack {
-            VStack{
-                HStack{
-                    Text("Voice Journal")
-                        .font(.title2)
-                        .fontWeight(.bold)
-                }
-                .padding(.bottom, 5)
-                
-                Text("Captures thoughts and emotions effortlessly.")
-                    .font(.subheadline)
-            }
-            .frame(maxWidth: .infinity)
-            .padding()
-            
-            Spacer()
-            
-            Text(Date(), style: .date)
-                .font(.title3)
-                .fontWeight(.bold)
-            
-            Spacer()
-            
-            Image("voicejournalimage")
-                .resizable()
-                .scaledToFit()
-                .frame(width: 230, height: 230, alignment: .center)
-                .clipShape(Circle())
-                .padding()
-            
-            Spacer()
-            
-            HStack(spacing: 10){
-                Toggle("", isOn: $toggleOn)
-
-                if toggleOn {
-                    Text("Public")
-                        .font(.subheadline)
-                } else {
-                    Text("Private")
-                        .font(.subheadline)
-                }
-            }
-            .padding(.horizontal)
-            
             VStack {
-                TabView(selection: $selectedTab) {
-                    ForEach(audioRecorder.audioClips) { clip in
-                        VStack {
-                            HStack {
-                                Button(action: {
-                                    self.audioRecorder.togglePlayback(of: clip)
-                                }) {
-                                    Image(systemName: clip.isPlaying ? "stop.fill" : "play.fill")
-                                        .foregroundColor(.purple)
-                                }
-                                ProgressBar(value: clip.playbackProgress)
-                                    .frame(height: 20)
-                                    .padding()
-                                Button(action: {
-                                    let index = audioRecorder.audioClips.firstIndex(where: { $0 == clip })!
-                                    self.audioRecorder.delete(at: [index])
-                                }) {
-                                    Image(systemName: "multiply.circle.fill")
-                                        .foregroundColor(.red)
-                                }
-                            }
-                            .padding()
-                                                        
-                            if clip.isPlaying {
-                                Text(clip.transcript)
-                                    .frame(maxWidth: .infinity)
-                                    .fixedSize(horizontal: false, vertical: true)
-                                    .background(RoundedRectangle(cornerRadius: 5).stroke(Color.gray, lineWidth: 1))
-                                    .cornerRadius(5)
-                                    .multilineTextAlignment(.leading)
-                                    .padding()
-                            }
-                        }
-                        .tag(audioRecorder.audioClips.firstIndex(where: { $0 == clip })!)
+                VStack{
+                    HStack{
+                        Text("Voice Journal")
+                            .font(.title2)
+                            .fontWeight(.bold)
                     }
-                    .onDelete(perform: audioRecorder.delete)
+                    .padding(.bottom, 5)
+                    
+                    Text("Captures thoughts and emotions effortlessly.")
+                        .font(.subheadline)
                 }
-                .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
-                .background(Color.gray.opacity(0.1))
-                
-                HStack {
-                    ForEach(audioRecorder.audioClips) { clip in
-                        let index = audioRecorder.audioClips.firstIndex(where: { $0 == clip })!
-                        Circle()
-                            .fill(selectedTab == index ? Color.blue : Color.gray)
-                            .frame(width: 10, height: 10)
-                            .padding(.horizontal, 2)
-                    }
-                }
-            }
-
-            Spacer()
-
-            Button(action: audioRecorder.toggleRecording) {
-                Circle()
-                    .foregroundColor(.purple)
-                    .overlay(
-                        Image(systemName: audioRecorder.isRecording ? "stop.fill" : "record.circle.fill")
-                            .foregroundColor(.white)
-                    )
-                    .frame(width: 70, height: 70)
+                .frame(maxWidth: .infinity)
+                .padding()
+                                                
+                Text(Date(), style: .date)
+                    .font(.title3)
+                    .fontWeight(.bold)
+                                
+                Image("voicejournalimage")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 200, height: 200, alignment: .center)
+                    .clipShape(Circle())
                     .padding()
-            }
-        }
-    }
-}
-
-struct ProgressBar: View {
-    var value: Double
-
-    var body: some View {
-        GeometryReader { geometry in
-            ZStack(alignment: .leading) {
-                Rectangle()
-                    .frame(width: geometry.size.width, height: geometry.size.height)
-                    .opacity(0.3)
-                    .foregroundColor(Color(UIColor.systemTeal))
-
-                Rectangle()
-                    .frame(width: CGFloat(self.value) * geometry.size.width, height: geometry.size.height)
-                    .foregroundColor(Color(UIColor.systemTeal))
-            }
-            .cornerRadius(45.0)
+                                
+                HStack(spacing: 10){
+                    Toggle("", isOn: $toggleOn)
+                    
+                    if toggleOn {
+                        Text("Public")
+                            .font(.subheadline)
+                    } else {
+                        Text("Private")
+                            .font(.subheadline)
+                    }
+                }
+                .padding(.horizontal)
+                                
+                VStack {
+                    RecordingsList()
+                        .environmentObject(audioRecorderManager)
+                    
+                    if audioRecorderManager.recording == false {
+                        Button(action: {self.audioRecorderManager.startRecording()}) {
+                            Image(systemName: "circle.fill")
+                                .resizable()
+                                .aspectRatio(contentMode: .fill)
+                                .frame(width: 70, height: 70)
+                                .clipped()
+                                .foregroundColor(.red)
+                                .padding(.bottom, 40)
+                        }
+                    } else {
+                        Button(action: {
+                            self.audioRecorderManager.stopRecording() { success in
+                                if success {
+                                    let allRecordingURLs = audioRecorderManager.recordings.map { $0.fileURL }
+                                    journalManager.saveJournalWithAudioClips(title: journalTitle, text: journalText, audioFileURLs: allRecordingURLs) { success in
+                                        if success {
+                                            print("Successfully saved journal with audio clips!")
+                                        } else {
+                                            print("Failed to save journal.")
+                                        }
+                                    }
+                                } else {
+                                    print("Failed to stop recording.")
+                                }
+                            }
+                        }) {
+                            Image(systemName: "stop.fill")
+                                .resizable()
+                                .aspectRatio(contentMode: .fill)
+                                .frame(width: 70, height: 70)
+                                .clipped()
+                                .foregroundColor(.red)
+                                .padding(.bottom, 40)
+                        }
+                    }
+                }
+                
         }
     }
 }
