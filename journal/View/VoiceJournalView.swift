@@ -68,7 +68,7 @@ struct VoiceJournalView: View {
                         VStack {
                             ForEach(audioRecorderManager.recordings, id: \.createdAt) { recording in
                                 VStack(alignment: .leading) {
-                                    RecordingRow(audioURL: recording.fileURL, createdAt: recording.createdAt)
+                                    RecordingRow(audioURL: recording.fileURL, createdAt: recording.createdAt, duration: recording.duration)
                                         .padding()
                                         .background(Color.purple.opacity(0.3).clipShape(RoundedRectangle(cornerRadius: 10)))
                                         .overlay(
@@ -116,15 +116,17 @@ struct VoiceJournalView: View {
                     
                     if audioRecorderManager.recording == false {
                         Button(action: {self.audioRecorderManager.startRecording()}) {
-                            Image(systemName: "mic")
+                            
+                            Image(systemName: "mic.fill")
                                 .resizable()
                                 .aspectRatio(contentMode: .fit)
                                 .frame(width: 30, height: 30)
                                 .foregroundColor(.white)
-                                .padding(20)  // Adjust this value to increase or decrease the space
-                                .background(Color.green)
+                                .padding(20)
+                                .background(Color.red)
                                 .clipShape(Circle())
                                 .padding([.top,.bottom], 20)
+                            
                         }
                     } else {
                         Button(action: {
@@ -144,13 +146,13 @@ struct VoiceJournalView: View {
                                 }
                             }
                         }) {
-                            Image(systemName: "mic.fill")
+                            Image(systemName: "mic")
                                 .resizable()
                                 .aspectRatio(contentMode: .fit)
                                 .frame(width: 30, height: 30)
                                 .foregroundColor(.white)
                                 .padding(20)  // Adjust this value to increase or decrease the space
-                                .background(Color.red)
+                                .background(Color.green)
                                 .clipShape(Circle())
                                 .padding([.top,.bottom], 20)
                         }

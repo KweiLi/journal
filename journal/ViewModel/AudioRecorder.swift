@@ -16,10 +16,11 @@ import Speech
 
 
 struct Recording {
-    var fileURL: URL // This is the remote URL on Firebase
-    var localURL: URL? // This is the new field to store the local URL
+    var fileURL: URL
+    var localURL: URL?
     var createdAt: Date
-    var transcription: String? // I assume you might have a field like this for storing transcription
+    var transcription: String?
+    var duration: TimeInterval? 
 }
 
 class AudioRecorder: NSObject, ObservableObject {
@@ -114,7 +115,7 @@ class AudioRecorder: NSObject, ObservableObject {
     func stopRecording(completion: @escaping (Bool) -> Void) {
         audioRecorder.stop()
         recording = false
-        
+                
         let storageRef = Storage.storage().reference().child("audioFiles/\(UUID().uuidString).m4a")
         
         if let audioData = try? Data(contentsOf: audioRecorder.url) {
@@ -130,7 +131,10 @@ class AudioRecorder: NSObject, ObservableObject {
                         } else {
                             // Successfully uploaded to Firebase, now add the recording to the recordings array.
                             let localPath = self.audioRecorder.url
-                            let newRecording = Recording(fileURL: url!, localURL: localPath,  createdAt: Date())
+                            let audioAsset = AVURLAsset(url: localPath)
+                            let duration = CMTimeGetSeconds(audioAsset.duration)
+
+                            let newRecording = Recording(fileURL: url!, localURL: localPath, createdAt: Date(), duration: duration)
                             self.recordings.append(newRecording)
                             completion(true)
                         }

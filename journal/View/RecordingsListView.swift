@@ -41,16 +41,24 @@ struct RecordingRow: View {
     
     var audioURL: URL
     var createdAt: Date
-    
+    var duration: TimeInterval?
+
     @ObservedObject var audioPlayer = AudioPlayer()
     
     var body: some View {
         HStack {
             Text(createdAt.toCustomString())
-                .font(.headline)
+                .font(.caption)
                 .foregroundColor(.black)
+                .fontWeight(.bold)
                 
             Spacer()
+            
+            Text(formattedDuration)
+                            .font(.caption)
+                            .foregroundColor(.gray)
+                            .fontWeight(.bold)
+
             if audioPlayer.isPlaying == false {
                 Button(action: {
                     self.audioPlayer.startPlayback(audio: self.audioURL)
@@ -89,6 +97,20 @@ extension Date {
         case 2, 22: return "nd"
         case 3, 23: return "rd"
         default: return "th"
+        }
+    }
+}
+
+extension RecordingRow {
+    var formattedDuration: String {
+        guard let duration = duration else { return "00:00" }
+        let hours = Int(duration) / 3600
+        let minutes = Int(duration) / 60 % 60
+        let seconds = Int(duration) % 60
+        if hours > 0 {
+            return String(format: "%02i:%02i:%02i", hours, minutes, seconds)
+        } else {
+            return String(format: "%02i:%02i", minutes, seconds)
         }
     }
 }
