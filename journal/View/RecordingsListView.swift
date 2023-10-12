@@ -46,8 +46,13 @@ struct RecordingRow: View {
     @ObservedObject var audioPlayer = AudioPlayer()
     
     var body: some View {
-        HStack {
-            Text(createdAt.toCustomString())
+        HStack (spacing: 10) {
+            
+            Image(systemName: "clock.badge")
+                .imageScale(.medium)
+                .foregroundColor(.black)
+
+            Text("Recorded at: " + createdAt.toCustomString())
                 .font(.caption)
                 .foregroundColor(.black)
                 .fontWeight(.bold)
@@ -64,16 +69,16 @@ struct RecordingRow: View {
                     self.audioPlayer.startPlayback(audio: self.audioURL)
                 }) {
                     Image(systemName: "play.fill")
-                        .imageScale(.large)
+                        .imageScale(.medium)
                         .foregroundColor(.red)
                 }
             } else {
                 Button(action: {
                     self.audioPlayer.stopPlayback()
                 }) {
-                    Image(systemName: "stop.fill")
-                        .imageScale(.large)
-                        .foregroundColor(.green)
+                    Image(systemName: "waveform")
+                        .imageScale(.medium)
+                        .foregroundColor(.purple)
                 }
             }
         }
@@ -83,7 +88,7 @@ struct RecordingRow: View {
 extension Date {
     func toCustomString() -> String {
         let formatter = DateFormatter()
-        formatter.dateFormat = "MMMM d, yyyy HH:mm:ss"
+        formatter.dateFormat = "HH:mm:ss"
         let baseString = formatter.string(from: self)
         let day = Calendar.current.component(.day, from: self)
         let suffix = daySuffix(from: day)

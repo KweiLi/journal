@@ -34,7 +34,6 @@ struct OneLinerJournalView: View {
 
                     JournalSubmissionButtonView()
                 }
-                
             }
             .onTapGesture {
                 self.endEditing()
