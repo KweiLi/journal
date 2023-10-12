@@ -68,14 +68,17 @@ struct VoiceJournalView: View {
                         VStack {
                             ForEach(audioRecorderManager.recordings, id: \.createdAt) { recording in
                                 VStack(alignment: .leading) {
-                                    RecordingRow(audioURL: recording.fileURL)
+                                    RecordingRow(audioURL: recording.fileURL, createdAt: recording.createdAt)
                                         .padding()
                                         .background(Color.purple.opacity(0.3).clipShape(RoundedRectangle(cornerRadius: 10)))
                                         .overlay(
                                             RoundedRectangle(cornerRadius: 10)
                                                 .stroke(Color.white, lineWidth: 2)
                                         )
-                                        .padding(5)
+                                        .padding(.top, 5)
+                                        .padding(.bottom, 5)
+                                        .padding(.leading, 20)
+                                        .padding(.trailing, 20)
                                         .onTapGesture {
                                             if let localURL = recording.localURL {
                                                 audioRecorderManager.transcribeAudio(localURL) { transcription in
@@ -90,12 +93,18 @@ struct VoiceJournalView: View {
                                                 print("No local file found for transcription.")
                                             }
                                         }
-
                                     
                                     if let transcription = recording.transcription {
                                         Text(transcription)
-                                            .font(.footnote)
-                                            .foregroundColor(.gray)
+                                            .font(.caption)
+                                            .foregroundColor(.black)
+                                            .padding()
+                                            .background(Color.purple.opacity(0.2))
+                                            .cornerRadius(10)
+                                            .padding(.top, 5)
+                                            .padding(.bottom, 5)
+                                            .padding(.leading, 40)
+                                            .padding(.trailing, 40)
                                     }
                                 }
                             }
@@ -110,9 +119,9 @@ struct VoiceJournalView: View {
                             Image(systemName: "mic")
                                 .resizable()
                                 .aspectRatio(contentMode: .fit)
-                                .frame(width: 40, height: 40)
+                                .frame(width: 30, height: 30)
                                 .foregroundColor(.white)
-                                .padding(10)  // Adjust this value to increase or decrease the space
+                                .padding(20)  // Adjust this value to increase or decrease the space
                                 .background(Color.green)
                                 .clipShape(Circle())
                                 .padding([.top,.bottom], 20)
@@ -138,9 +147,9 @@ struct VoiceJournalView: View {
                             Image(systemName: "mic.fill")
                                 .resizable()
                                 .aspectRatio(contentMode: .fit)
-                                .frame(width: 40, height: 40)
+                                .frame(width: 30, height: 30)
                                 .foregroundColor(.white)
-                                .padding(10)  // Adjust this value to increase or decrease the space
+                                .padding(20)  // Adjust this value to increase or decrease the space
                                 .background(Color.red)
                                 .clipShape(Circle())
                                 .padding([.top,.bottom], 20)

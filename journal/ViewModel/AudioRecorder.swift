@@ -24,12 +24,9 @@ struct Recording {
 
 class AudioRecorder: NSObject, ObservableObject {
     
-//    override init() {
-//        super.init()
-//        fetchRecording()
-//    }
-    
-    
+    @Published var recordings = [Recording]()
+    @Published var recording = false
+        
     override init() {
         super.init()
         requestTranscriptionPermission()
@@ -80,18 +77,10 @@ class AudioRecorder: NSObject, ObservableObject {
         }
     }
 
-    let objectWillChange = PassthroughSubject<AudioRecorder, Never>()
     
     var audioRecorder: AVAudioRecorder!
     
-    var recordings = [Recording]()
-    
-    var recording = false {
-        didSet {
-            objectWillChange.send(self)
-        }
-    }
-    
+
     func startRecording() {
         let recordingSession = AVAudioSession.sharedInstance()
         
@@ -143,8 +132,6 @@ class AudioRecorder: NSObject, ObservableObject {
                             let localPath = self.audioRecorder.url
                             let newRecording = Recording(fileURL: url!, localURL: localPath,  createdAt: Date())
                             self.recordings.append(newRecording)
-                            // Trigger UI update.
-                            self.objectWillChange.send(self)
                             completion(true)
                         }
                     }
