@@ -11,11 +11,15 @@ import Combine
 import AVFoundation
 import FirebaseFirestore
 import FirebaseStorage
+import Speech
+
 
 
 struct Recording {
-    let fileURL: URL
-    let createdAt: Date
+    var fileURL: URL // This is the remote URL on Firebase
+    var localURL: URL? // This is the new field to store the local URL
+    var createdAt: Date
+    var transcription: String? // I assume you might have a field like this for storing transcription
 }
 
 class AudioRecorder: NSObject, ObservableObject {
@@ -25,6 +29,57 @@ class AudioRecorder: NSObject, ObservableObject {
 //        fetchRecording()
 //    }
     
+    
+    override init() {
+        super.init()
+        requestTranscriptionPermission()
+    }
+    
+    private func requestTranscriptionPermission() {
+        SFSpeechRecognizer.requestAuthorization { authStatus in
+            if authStatus == .authorized {
+                print("Speech recognition authorization granted")
+            } else {
+                print("Speech recognition authorization denied")
+            }
+        }
+    }
+    
+    func transcribeAudio(_ url: URL, completion: @escaping (String?) -> Void) {
+        let fileManager = FileManager.default
+        if fileManager.fileExists(atPath: url.path) {
+            print("File exists!")
+        } else {
+            print("File doesn't exist.")
+            completion(nil) // if the file doesn't exist, exit early
+            return
+        }
+        
+        guard let recognizer = SFSpeechRecognizer() else {
+            print("Speech recognition not initialized.")
+            completion(nil)
+            return
+        }
+
+        // Check if speech recognition is available
+        if !recognizer.isAvailable {
+            print("Speech recognition is not available.")
+            completion(nil)
+            return
+        }
+
+        let request = SFSpeechURLRecognitionRequest(url: url)
+        
+        recognizer.recognitionTask(with: request) { result, error in
+            if let result = result, result.isFinal {
+                completion(result.bestTranscription.formattedString)
+            } else {
+                print("Transcription failed: \(error?.localizedDescription ?? "Unknown error")")
+                completion(nil)
+            }
+        }
+    }
+
     let objectWillChange = PassthroughSubject<AudioRecorder, Never>()
     
     var audioRecorder: AVAudioRecorder!
@@ -70,7 +125,7 @@ class AudioRecorder: NSObject, ObservableObject {
     func stopRecording(completion: @escaping (Bool) -> Void) {
         audioRecorder.stop()
         recording = false
-
+        
         let storageRef = Storage.storage().reference().child("audioFiles/\(UUID().uuidString).m4a")
         
         if let audioData = try? Data(contentsOf: audioRecorder.url) {
@@ -84,14 +139,13 @@ class AudioRecorder: NSObject, ObservableObject {
                             print("Failed to fetch URL: \(error)")
                             completion(false)
                         } else {
-                            
                             // Successfully uploaded to Firebase, now add the recording to the recordings array.
-                            let newRecording = Recording(fileURL: url!, createdAt: Date())
+                            let localPath = self.audioRecorder.url
+                            let newRecording = Recording(fileURL: url!, localURL: localPath,  createdAt: Date())
                             self.recordings.append(newRecording)
                             // Trigger UI update.
                             self.objectWillChange.send(self)
                             completion(true)
-
                         }
                     }
                 }
@@ -126,5 +180,6 @@ class AudioRecorder: NSObject, ObservableObject {
             }
         }
     }
+
 
 }

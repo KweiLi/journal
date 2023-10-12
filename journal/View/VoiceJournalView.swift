@@ -12,6 +12,8 @@ import Speech
 
 struct VoiceJournalView: View {
     @StateObject var audioRecorderManager = AudioRecorder()
+    @StateObject var audioPlayerManager = AudioPlayer()
+
     private let journalManager = JournalManager()
 
     @State var journalTitle: String = "My Voice Journal"
@@ -19,6 +21,9 @@ struct VoiceJournalView: View {
     @State var toggleOn: Bool = false
     
     @State var transcribedText: String = ""
+    @State private var isTranscribing: Bool = false
+
+
     
     var body: some View {
         
@@ -62,14 +67,37 @@ struct VoiceJournalView: View {
                     ScrollView {
                         VStack {
                             ForEach(audioRecorderManager.recordings, id: \.createdAt) { recording in
-                                RecordingRow(audioURL: recording.fileURL)
-                                    .padding()
-                                    .background(Color.purple.opacity(0.3).clipShape(RoundedRectangle(cornerRadius: 10)))
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 10)
-                                            .stroke(Color.white, lineWidth: 2)
-                                    )
-                                    .padding()
+                                VStack(alignment: .leading) {
+                                    RecordingRow(audioURL: recording.fileURL)
+                                        .padding()
+                                        .background(Color.purple.opacity(0.3).clipShape(RoundedRectangle(cornerRadius: 10)))
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 10)
+                                                .stroke(Color.white, lineWidth: 2)
+                                        )
+                                        .padding(5)
+                                        .onTapGesture {
+                                            if let localURL = recording.localURL {
+                                                audioRecorderManager.transcribeAudio(localURL) { transcription in
+                                                    if let transcription = transcription,
+                                                       let index = audioRecorderManager.recordings.firstIndex(where: { $0.createdAt == recording.createdAt }) {
+                                                        audioRecorderManager.recordings[index].transcription = transcription
+                                                        print(transcription)
+                                                    }
+                                                }
+                                            } else {
+                                                // Handle the case where there's no local URL (maybe it got deleted or there was an error while recording)
+                                                print("No local file found for transcription.")
+                                            }
+                                        }
+
+                                    
+                                    if let transcription = recording.transcription {
+                                        Text(transcription)
+                                            .font(.footnote)
+                                            .foregroundColor(.gray)
+                                    }
+                                }
                             }
                         }
                     }
@@ -94,6 +122,7 @@ struct VoiceJournalView: View {
                             self.audioRecorderManager.stopRecording() { success in
                                 if success {
                                     let allRecordingURLs = audioRecorderManager.recordings.map { $0.fileURL }
+                                    print(allRecordingURLs.count)
                                     journalManager.saveJournalWithAudioClips(title: journalTitle, text: journalText, audioFileURLs: allRecordingURLs) { success in
                                         if success {
                                             print("Successfully saved journal with audio clips!")

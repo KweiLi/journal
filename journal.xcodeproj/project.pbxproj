@@ -58,6 +58,7 @@
 		BCB912252ACC8BF4007C5F11 /* Date.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Date.swift; sourceTree = "<group>"; };
 		BCB912272ACC8C32007C5F11 /* Helper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Helper.swift; sourceTree = "<group>"; };
 		BCB912292ACC8D47007C5F11 /* RecordingsListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingsListView.swift; sourceTree = "<group>"; };
+		BCB9122E2AD73D1F007C5F11 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -94,6 +95,7 @@
 		BCB911EB2ACB78A0007C5F11 /* journal */ = {
 			isa = PBXGroup;
 			children = (
+				BCB9122E2AD73D1F007C5F11 /* Info.plist */,
 				BCB9121E2ACC71F4007C5F11 /* Extensions */,
 				BCB911FC2ACC67B3007C5F11 /* Model */,
 				BCB911FA2ACC67A7007C5F11 /* ViewModel */,
@@ -396,6 +398,7 @@
 				DEVELOPMENT_TEAM = MFZZKNP64S;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = journal/Info.plist;
 				INFOPLIST_KEY_NSCameraUsageDescription = "We need access to your camera to take a photo.";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Please grant permission to generate translated text for journaling";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "We need access to your photos to detect text.";
@@ -429,6 +432,7 @@
 				DEVELOPMENT_TEAM = MFZZKNP64S;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = journal/Info.plist;
 				INFOPLIST_KEY_NSCameraUsageDescription = "We need access to your camera to take a photo.";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Please grant permission to generate translated text for journaling";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "We need access to your photos to detect text.";
