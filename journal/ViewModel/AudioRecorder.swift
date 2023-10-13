@@ -14,15 +14,6 @@ import FirebaseStorage
 import Speech
 
 
-
-struct Recording {
-    var fileURL: URL
-    var localURL: URL?
-    var createdAt: Date
-    var transcription: String?
-    var duration: TimeInterval? 
-}
-
 class AudioRecorder: NSObject, ObservableObject {
     
     @Published var recordings = [Recording]()
@@ -115,7 +106,7 @@ class AudioRecorder: NSObject, ObservableObject {
     func stopRecording(completion: @escaping (Bool) -> Void) {
         audioRecorder.stop()
         recording = false
-                
+        
         let storageRef = Storage.storage().reference().child("audioFiles/\(UUID().uuidString).m4a")
         
         if let audioData = try? Data(contentsOf: audioRecorder.url) {

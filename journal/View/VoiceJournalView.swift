@@ -14,13 +14,11 @@ struct VoiceJournalView: View {
     
     @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
     
+    @EnvironmentObject var journalManager: JournalManager
+    
     @StateObject var audioRecorderManager = AudioRecorder()
     @StateObject var audioPlayerManager = AudioPlayer()
 
-    private let journalManager = JournalManager()
-
-    @State var journalTitle: String = "My Voice Journal"
-    @State var journalText: String = "Today's thoughts."
     @State var toggleOn: Bool = false
     
     @State var transcribedText: String = ""
@@ -67,9 +65,7 @@ struct VoiceJournalView: View {
                 .padding(.horizontal)
                                 
                 VStack {
-                    
                     if audioRecorderManager.recordings.count == 0 {
-                        
                         ZStack {
                             RoundedRectangle(cornerRadius: 20)
                                 .fill(Color.white)
@@ -87,7 +83,6 @@ struct VoiceJournalView: View {
                             }
                         }
                         .padding()
-
                     } else {
                         ScrollView {
                             VStack {
@@ -164,15 +159,7 @@ struct VoiceJournalView: View {
                         Button(action: {
                             self.audioRecorderManager.stopRecording() { success in
                                 if success {
-                                    let allRecordingURLs = audioRecorderManager.recordings.map { $0.fileURL }
-                                    print(allRecordingURLs.count)
-                                    journalManager.saveJournalWithAudioClips(title: journalTitle, text: journalText, audioFileURLs: allRecordingURLs) { success in
-                                        if success {
-                                            print("Successfully saved journal with audio clips!")
-                                        } else {
-                                            print("Failed to save journal.")
-                                        }
-                                    }
+
                                 } else {
                                     print("Failed to stop recording.")
                                 }
@@ -195,21 +182,17 @@ struct VoiceJournalView: View {
         .navigationBarTitle("Voice Journal", displayMode: .inline)
         .navigationBarBackButtonHidden(true)
         .navigationBarItems(leading: Button(action: {
-            // Call your save function here.
-            saveJournal()
-            
-            // This line pops the view.
             self.presentationMode.wrappedValue.dismiss()
+            
+            journalManager.currentJournal.title = "My Voice Journal"
+            journalManager.currentJournal.category = "voice"
+            journalManager.currentJournal.recordings = audioRecorderManager.recordings
+            
+            journalManager.saveJournal(journal: journalManager.currentJournal)
         }) {
-            Image(systemName: "arrowshape.turn.up.backward") // Custom back arrow image
+            Image(systemName: "arrowshape.turn.up.backward")
         })
     }
-    
-    func saveJournal() {
-            // Your save journal code here.
-            print("Journal saved!")
-        }
-
 }
 
 struct VoiceJournalView_Previews: PreviewProvider {

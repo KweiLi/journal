@@ -36,29 +36,27 @@ class JournalManager: ObservableObject {
         }
     }
 
-
     // Upload multiple audio recordings to Firebase Storage
-    private func uploadRecordings(_ fileURLs: [URL], completion: @escaping ([AudioClip]) -> Void) {
+    private func uploadRecordings(_ fileURLs: [URL], completion: @escaping ([Recording]) -> Void) {
         let dispatchGroup = DispatchGroup()
-        var audioClips: [AudioClip] = []
+        var recordings: [Recording] = []
 
         for fileURL in fileURLs {
             dispatchGroup.enter()
-            uploadRecording(fileURL) { audioURL in
-                if let audioURL = audioURL {
-                    let audioClip = AudioClip(id: UUID().uuidString, url: audioURL)
-                    audioClips.append(audioClip)
+            uploadRecording(fileURL) { recording in
+                if let recording = recording {
+                    recordings.append(recording)
                 }
                 dispatchGroup.leave()
             }
         }
 
         dispatchGroup.notify(queue: .main) {
-            completion(audioClips)
+            completion(recordings)
         }
     }
 
-    private func uploadRecording(_ fileURL: URL, completion: @escaping (String?) -> Void) {
+    private func uploadRecording(_ fileURL: URL, completion: @escaping (Recording?) -> Void) {
         let storageRef = Storage.storage().reference().child("audioFiles/\(UUID().uuidString).m4a")
 
         if let audioData = try? Data(contentsOf: fileURL) {
@@ -71,8 +69,9 @@ class JournalManager: ObservableObject {
                         if let error = error {
                             print("Failed to fetch URL: \(error)")
                             completion(nil)
-                        } else if let urlString = url?.absoluteString {
-                            completion(urlString)
+                        } else if let audioURL = url {
+                            let recording = Recording(id: UUID().uuidString, fileURL: audioURL, localURL: fileURL, createdAt: Date())
+                            completion(recording)
                         }
                     }
                 }
@@ -83,19 +82,18 @@ class JournalManager: ObservableObject {
         }
     }
 
-    // Save a new journal with multiple attached audio clips
-    func saveJournalWithAudioClips(title: String, text: String, audioFileURLs: [URL], completion: @escaping (Bool) -> Void) {
-        uploadRecordings(audioFileURLs) { audioClips in
-            if audioClips.count != audioFileURLs.count {
+    // Save a new journal with multiple attached recordings
+    func saveJournalWithRecordings(title: String, text: String, audioFileURLs: [URL], completion: @escaping (Bool) -> Void) {
+        uploadRecordings(audioFileURLs) { recordings in
+            if recordings.count != audioFileURLs.count {
                 completion(false)
                 return
             }
 
-            let newJournal = Journal(id: UUID().uuidString, title: title, text: text, audioClips: audioClips)
+            let newJournal = Journal(id: UUID().uuidString, title: title, text: text, recordings: recordings)
             
             self.saveJournal(journal: newJournal)
             completion(true)
         }
     }
-    
 }

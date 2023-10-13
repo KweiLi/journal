@@ -11,18 +11,23 @@ import SwiftUI
 
 struct Journal: Identifiable, Hashable, Codable {
     let id: String?
+    var category = ""
     var title: String = ""
     var text: String = ""
     var date: Date = Date()
     var type: String = ""
-    var audioClips: [AudioClip] = []
+    var recordings: [Recording] = []
     var imageUrls: [String] = []
     var publishIndicator: Bool = false
     var liked: Int = 0
 }
 
-struct AudioClip: Identifiable, Equatable, Hashable, Codable {
-    let id: String
-    let url: String
-    var transcript = ""
+
+struct Recording: Identifiable, Equatable, Hashable, Codable {
+    var id: String?
+    var fileURL: URL
+    var localURL: URL?
+    var createdAt: Date
+    var transcription: String?
+    var duration: TimeInterval?
 }
