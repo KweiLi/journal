@@ -11,6 +11,9 @@ import AVFoundation
 import Speech
 
 struct VoiceJournalView: View {
+    
+    @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
+    
     @StateObject var audioRecorderManager = AudioRecorder()
     @StateObject var audioPlayerManager = AudioPlayer()
 
@@ -22,7 +25,6 @@ struct VoiceJournalView: View {
     
     @State var transcribedText: String = ""
     @State private var isTranscribing: Bool = false
-
 
     
     var body: some View {
@@ -190,9 +192,24 @@ struct VoiceJournalView: View {
                 }
             }
         }
-        
-
+        .navigationBarTitle("Voice Journal", displayMode: .inline)
+        .navigationBarBackButtonHidden(true)
+        .navigationBarItems(leading: Button(action: {
+            // Call your save function here.
+            saveJournal()
+            
+            // This line pops the view.
+            self.presentationMode.wrappedValue.dismiss()
+        }) {
+            Image(systemName: "arrowshape.turn.up.backward") // Custom back arrow image
+        })
     }
+    
+    func saveJournal() {
+            // Your save journal code here.
+            print("Journal saved!")
+        }
+
 }
 
 struct VoiceJournalView_Previews: PreviewProvider {
