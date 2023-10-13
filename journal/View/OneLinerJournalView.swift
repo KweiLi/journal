@@ -16,7 +16,8 @@ extension View {
 struct OneLinerJournalView: View {
     
     @EnvironmentObject var journalManager: JournalManager
-    
+    @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
+
     var body: some View {
         
         ZStack{
@@ -25,20 +26,28 @@ struct OneLinerJournalView: View {
             
             ScrollView{
                 VStack {
-                    // Welcome Section
                     JournalHeaderView(journalType: "One-Liner Journal", journalTypeDescription: "Capture the essence of your day in one sentence.")
                     
-                    OneLinerJounalContentView(
-                        journalText: $journalManager.currentJournal.text, journalSubject: $journalManager.currentJournal.title,
-                        journalPublishIndicator: $journalManager.currentJournal.publishIndicator)
-
-                    JournalSubmissionButtonView()
+                    OneLinerJounalContentView()
+                    .environmentObject(journalManager)
                 }
             }
             .onTapGesture {
                 self.endEditing()
             }
         }
+        .navigationBarTitle("Voice Journal", displayMode: .inline)
+        .navigationBarBackButtonHidden(true)
+        .navigationBarItems(leading: Button(action: {
+            self.presentationMode.wrappedValue.dismiss()
+            
+            journalManager.currentJournal.title = "My One-Liner Journal"
+            journalManager.currentJournal.category = "oneliner"
+            
+            journalManager.saveJournal(journal: journalManager.currentJournal)
+        }) {
+            Image(systemName: "arrowshape.turn.up.backward")
+        })
     }
 }
 

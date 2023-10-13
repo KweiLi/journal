@@ -9,6 +9,8 @@ import SwiftUI
 
 struct OneLinerJounalContentView: View {
     
+    @EnvironmentObject var journalManager: JournalManager
+    
     let journalTags = ["Poetry", "Fitness", "Dream", "Accomplishment", "Gratitude"]
     let journalImages = ["poetryimage", "fitnessimage", "dreamimage", "accomplishmentimage", "gratitudeimage"]
     let journalExamplebyType: [String: String] = [
@@ -29,10 +31,6 @@ struct OneLinerJounalContentView: View {
         """,
     ]
     
-    @Binding var journalText: String
-    @Binding var journalSubject: String
-    @Binding var journalPublishIndicator: Bool
-
     @State private var selectedTag: Int = 0
     @FocusState private var isTextFieldFocused: Bool
 
@@ -53,7 +51,7 @@ struct OneLinerJounalContentView: View {
                     Button(action: {
                         if selectedTag > 0 {
                             selectedTag -= 1
-                            journalSubject = journalTags[selectedTag]
+                            journalManager.currentJournal.type = journalTags[selectedTag]
                         }
                     }) {
                         Image(systemName: "arrow.left")
@@ -87,13 +85,13 @@ struct OneLinerJounalContentView: View {
                                             // Swipe right
                                             if selectedTag > 0 {
                                                 selectedTag -= 1
-                                                journalSubject = journalTags[selectedTag]
+                                                journalManager.currentJournal.type = journalTags[selectedTag]
                                             }
                                         } else {
                                             // Swipe left
                                             if selectedTag < journalImages.count - 1 {
                                                 selectedTag += 1
-                                                journalSubject = journalTags[selectedTag]
+                                                journalManager.currentJournal.type = journalTags[selectedTag]
                                             }
                                         }
                                     }
@@ -105,7 +103,7 @@ struct OneLinerJounalContentView: View {
                     Button(action: {
                         if selectedTag < journalImages.count - 1 {
                             selectedTag += 1
-                            journalSubject = journalTags[selectedTag]
+                            journalManager.currentJournal.type = journalTags[selectedTag]
                         }
                     }) {
                         Image(systemName: "arrow.right")
@@ -124,29 +122,30 @@ struct OneLinerJounalContentView: View {
                     .disabled(selectedTag == journalImages.count - 1)
                 }
                 
-                HStack(spacing: 10){
-                    Toggle("", isOn: $journalPublishIndicator)
-                    
-                    if journalPublishIndicator {
-                        Text("Public")
-                            .font(.subheadline)
-                            .foregroundColor(.black)
-
-                    } else {
-                        Text("Private")
-                            .font(.subheadline)
-                            .foregroundColor(.black)
-                    }
-                }
-                .padding(.horizontal)
+                JournalPublicToggleView(toggle: $journalManager.currentJournal.publishIndicator)
+                    .padding(.horizontal)
                 
-                TextField("\(journalExamplebyType[journalTags[selectedTag]] ?? "")", text: $journalText, axis: .vertical)
-                    .focused($isTextFieldFocused)
-                    .padding(16)
-                    .background(RoundedRectangle(cornerRadius: 10).stroke(Color.gray, lineWidth: 1))
-                    .cornerRadius(10)
-                    .lineLimit(3...)
-                    .padding()
+                ZStack(alignment: .leading) {
+                    // The placeholder
+                    if journalManager.currentJournal.text.isEmpty && !isTextFieldFocused {
+                        Text("\(journalExamplebyType[journalTags[selectedTag]] ?? "")")
+                            .font(.footnote)
+                            .foregroundColor(.gray) // Adjust this to the color you want
+                            .padding(.all, 20)
+                    }
+
+                    // The actual TextField
+                    TextField("", text: $journalManager.currentJournal.text, axis: .vertical)
+                        .focused($isTextFieldFocused)
+                        .font(.footnote)
+                        .foregroundColor(.black)
+                        .padding(16)
+                        .background(RoundedRectangle(cornerRadius: 10).stroke(Color.gray, lineWidth: 1))
+                        .cornerRadius(10)
+                        .lineLimit(5...)
+                        .padding()
+                }
+
             }
             .padding()
         }

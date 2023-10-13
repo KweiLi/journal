@@ -32,6 +32,8 @@
 		BCB912282ACC8C32007C5F11 /* Helper.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCB912272ACC8C32007C5F11 /* Helper.swift */; };
 		BCB9122A2ACC8D47007C5F11 /* RecordingsListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCB912292ACC8D47007C5F11 /* RecordingsListView.swift */; };
 		BCB9122D2ACCB8E1007C5F11 /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = BCB9122C2ACCB8E1007C5F11 /* FirebaseStorage */; };
+		BCB912302AD9ADFD007C5F11 /* JournalPublicToggleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCB9122F2AD9ADFD007C5F11 /* JournalPublicToggleView.swift */; };
+		BCB912322AD9AED5007C5F11 /* VoiceJournalContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCB912312AD9AED5007C5F11 /* VoiceJournalContentView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -59,6 +61,8 @@
 		BCB912272ACC8C32007C5F11 /* Helper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Helper.swift; sourceTree = "<group>"; };
 		BCB912292ACC8D47007C5F11 /* RecordingsListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingsListView.swift; sourceTree = "<group>"; };
 		BCB9122E2AD73D1F007C5F11 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		BCB9122F2AD9ADFD007C5F11 /* JournalPublicToggleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JournalPublicToggleView.swift; sourceTree = "<group>"; };
+		BCB912312AD9AED5007C5F11 /* VoiceJournalContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceJournalContentView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -134,10 +138,12 @@
 				BCB912142ACC6CB4007C5F11 /* JournalHomeView.swift */,
 				BCB9120C2ACC696A007C5F11 /* JournalCard.swift */,
 				BCB9120E2ACC69A4007C5F11 /* JournalHeaderView.swift */,
+				BCB9122F2AD9ADFD007C5F11 /* JournalPublicToggleView.swift */,
 				BCB912122ACC69EF007C5F11 /* JournalSubmissionButtonView.swift */,
 				BCB912162ACC6CD2007C5F11 /* OneLinerJournalView.swift */,
 				BCB912102ACC69C8007C5F11 /* OneLinerJournalContentView.swift */,
 				BCB912182ACC6CE8007C5F11 /* VoiceJournalView.swift */,
+				BCB912312AD9AED5007C5F11 /* VoiceJournalContentView.swift */,
 				BCB912292ACC8D47007C5F11 /* RecordingsListView.swift */,
 				BCB9121A2ACC6CF5007C5F11 /* JournalWriterView.swift */,
 			);
@@ -259,6 +265,8 @@
 				BCB912282ACC8C32007C5F11 /* Helper.swift in Sources */,
 				BCB912152ACC6CB4007C5F11 /* JournalHomeView.swift in Sources */,
 				BCB912222ACC8B42007C5F11 /* AudioRecorder.swift in Sources */,
+				BCB912302AD9ADFD007C5F11 /* JournalPublicToggleView.swift in Sources */,
+				BCB912322AD9AED5007C5F11 /* VoiceJournalContentView.swift in Sources */,
 				BCB912202ACC71FF007C5F11 /* Color.swift in Sources */,
 				BCB912242ACC8B50007C5F11 /* AudioPlayer.swift in Sources */,
 				BCB912112ACC69C8007C5F11 /* OneLinerJournalContentView.swift in Sources */,
