@@ -17,6 +17,11 @@ struct JournalHomeView: View {
                     .ignoresSafeArea()
                 
                 VStack(spacing: 20) {
+                    
+                    Text("Select Jounal Type")
+                        .bold()
+                        .foregroundColor(.black)
+                    
                     JournalCard(
                             title: "One Liner",
                             description: "quick daily reflections and build mindfulness",

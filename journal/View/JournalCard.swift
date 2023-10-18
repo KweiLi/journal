@@ -29,7 +29,7 @@ struct JournalCard<Destination: View>: View {
                 HStack(spacing: 20) {
                     Image(image)
                         .resizable()
-                        .frame(width: 130, height: 130)
+                        .frame(width: 100, height: 100)
                         .cornerRadius(20)
                     
                     VStack(alignment: .leading, spacing: 15){
@@ -39,7 +39,7 @@ struct JournalCard<Destination: View>: View {
                             .fontWeight(.bold)
                         
                         Text(description)
-                            .font(.caption)
+                            .font(.footnote)
                             .foregroundColor(.black)
                             .multilineTextAlignment(.leading)
                     }
@@ -47,7 +47,7 @@ struct JournalCard<Destination: View>: View {
                 Spacer()
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-            .padding([.trailing,.leading], 30)
+            .padding([.trailing,.leading], 20)
             .foregroundColor(Color(hue: 0.656, saturation: 0.787, brightness: 0.354))
             .background(Color.theme.cardBackgroundColor)
             .cornerRadius(20)

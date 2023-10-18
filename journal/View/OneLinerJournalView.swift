@@ -24,13 +24,11 @@ struct OneLinerJournalView: View {
             Color.white
                 .ignoresSafeArea()
             
-            ScrollView{
-                VStack {
-                    JournalHeaderView(journalType: "One-Liner Journal", journalTypeDescription: "Capture the essence of your day in one sentence.")
-                    
-                    OneLinerJounalContentView()
-                    .environmentObject(journalManager)
-                }
+            VStack {
+                JournalHeaderView(journalType: "One-Liner Journal", journalTypeDescription: "Capture the essence of your day in one sentence.")
+                
+                OneLinerJounalContentView()
+                .environmentObject(journalManager)
             }
             .onTapGesture {
                 self.endEditing()

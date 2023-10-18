@@ -18,6 +18,7 @@ struct Journal: Identifiable, Hashable, Codable {
     var type: String = ""
     var recordings: [Recording] = []
     var imageUrls: [String] = []
+    var imageCaptions: [String] = []
     var publishIndicator: Bool = false
     var liked: Int = 0
 }

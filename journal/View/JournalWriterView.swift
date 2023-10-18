@@ -8,9 +8,10 @@
 import SwiftUI
 
 struct IdentifiableImage: Identifiable {
-    let id = UUID()
-    let image: UIImage
-    var caption: String = ""
+    var id = UUID()
+    var image: UIImage
+    var url: URL?
+    var caption: String?
 }
 
 enum ImagePickerSourceType {
@@ -19,6 +20,9 @@ enum ImagePickerSourceType {
 }
 
 struct JournalWriterView: View {
+    
+    @StateObject var imageManager = ImageManager()
+    
     @State private var images: [IdentifiableImage] = []
     @State private var showingImagePicker = false
     @State private var sourceType: ImagePickerSourceType = .photoLibrary
@@ -27,147 +31,163 @@ struct JournalWriterView: View {
     @State private var toggleOn: Bool = false
         
     var body: some View {
-        VStack{
-            VStack {
-                
-                Text("Journal Photos")
-                    .font(.title3)
-                    .fontWeight(.bold)
-                
-                if images.isEmpty {
-                    HStack {
-                        Spacer() // Pushes content to the right
-                        Image("imagepickerimage")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 150, height: 150)
-                            .foregroundColor(.gray)
-                            .cornerRadius(8)
-                            .padding()
-                        Spacer()
-                    }
-                    .background(Color.gray.opacity(0.2))
-                } else {
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack {
-                            ForEach(images, id: \.id) { identifiableImage in
-                                ZStack(alignment: .topTrailing) {
-                                    Image(uiImage: identifiableImage.image)
-                                        .resizable()
-                                        .frame(width: 150, height: 150)
-                                        .cornerRadius(8)
-                                        .onTapGesture {
-                                            selectedImage = identifiableImage
-                                        }
-                                    Button(action: {
-                                        if let index = images.firstIndex(where: { $0.id == identifiableImage.id }) {
-                                            images.remove(at: index)
-                                        }
-                                    }) {
-                                        Image(systemName: "xmark.circle.fill")
-                                            .foregroundColor(.red)
-                                    }
-                                }
-                                .padding()
+        
+        ZStack{
+            
+            Color.white
+                .ignoresSafeArea()
+            
+            VStack{
+                VStack {
+                    JournalHeaderView(journalType: "Reflective Journal", journalTypeDescription: "Think about events, experiences, or new information, and reflect on their implications and meanings.")
+                    
+                    if images.isEmpty {
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 20)
+                                .fill(Color.white)
+                                .overlay(RoundedRectangle(cornerRadius: 20).stroke(Color.theme.backgroundColor, lineWidth: 1))
+                            
+                            HStack(spacing: 10) {
+                                Image(systemName: "square.and.arrow.up.on.square")
+                                    .resizable()
+                                    .foregroundColor(.purple)
+                                    .frame(width: 20, height: 20)
+
+                                Text("Add Photos")
+                                    .foregroundColor(.black)
+                                    .font(.footnote)
                             }
                         }
-                    }
-                    .background(Color.gray.opacity(0.2))
-                }
-
-                HStack() {
-                    // Camera Button
-                    Button(action: {
-                        sourceType = .camera
-                        showingImagePicker.toggle()
-                        
-                    }) {
-                        Image(systemName: "camera.fill")
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .frame(width: 25, height: 25)
-                            .foregroundColor(.gray) // Color of the icon
-                            .padding(.horizontal)
-
-                    }
-                    .disabled(!UIImagePickerController.isSourceTypeAvailable(.camera))
-
-                    Button(action: {
-                        sourceType = .photoLibrary
-                        showingImagePicker.toggle()
-                    }) {
-                        Image(systemName: "folder.fill")
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .frame(width: 25, height: 25)
-                            .foregroundColor(.gray)
-                            .padding(.horizontal)
-                    }
-                }
-            }
-            .sheet(isPresented: $showingImagePicker) {
-                CustomImagePicker(images: $images, sourceType: sourceType)
-            }
-            .sheet(item: $selectedImage) { selectedImage in
-                VStack{
-                    Image(uiImage: selectedImage.image)
-                        .resizable()
-                        .scaledToFit()
                         .padding()
-                    Text(selectedImage.caption)
-                }
-            }
-            
+                    } else {
+                        ZStack{
+                            RoundedRectangle(cornerRadius: 20)
+                                .fill(Color.white)
+                                .overlay(RoundedRectangle(cornerRadius: 20).stroke(Color.theme.backgroundColor, lineWidth: 1))
 
-            HStack(){
-                            
-                Button(action: {
-                    // Your action goes here
-                    print("Mic button tapped!")
-                }) {
-                    Image(systemName: "mic.fill")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 22, height: 22)
+                            ScrollView(.horizontal, showsIndicators: false) {
+                                HStack {
+                                    ForEach(images, id: \.id) { identifiableImage in
+                                        ZStack(alignment: .topTrailing) {
+                                            Image(uiImage: identifiableImage.image)
+                                                .resizable()
+                                                .scaledToFit()
+                                                .frame(width: 140)
+                                                .cornerRadius(8)
+                                                .onTapGesture {
+                                                    selectedImage = identifiableImage
+                                                }
+                                            Button(action: {
+                                                if let index = images.firstIndex(where: { $0.id == identifiableImage.id }) {
+                                                    imageManager.deleteImageFromFirebase(url: identifiableImage.url!) { error in
+                                                        if let error = error {
+                                                            print("Failed to delete image: \(error.localizedDescription)")
+                                                        } else {
+                                                            images.remove(at: index)
+                                                        }
+                                                    }
+                                                }
+                                            }) {
+                                                Image(systemName: "xmark.circle.fill")
+                                                    .foregroundColor(.red)
+                                            }
+                                        }
+                                        .padding()
+                                    }
+                                }
+                            }
+                        }
                         .padding()
-                        .background(Color.white)
-                        .foregroundColor(.purple)
-                        .clipShape(Circle())
-                }
+                    }
+                    HStack() {
+                        Button(action: {
+                            sourceType = .camera
+                            showingImagePicker.toggle()
                             
-                Toggle("", isOn: $toggleOn)
+                        }) {
+                            Image(systemName: "camera.fill")
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                                .frame(width: 25, height: 25)
+                                .foregroundColor(.gray) // Color of the icon
+                                .padding(.horizontal)
 
-                if toggleOn {
-                    Text("Public")
-                        .font(.subheadline)
-                } else {
-                    Text("Private")
-                        .font(.subheadline)
+                        }
+                        .disabled(!UIImagePickerController.isSourceTypeAvailable(.camera))
+
+                        Button(action: {
+                            sourceType = .photoLibrary
+                            showingImagePicker.toggle()
+                        }) {
+                            Image(systemName: "folder.fill")
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                                .frame(width: 25, height: 25)
+                                .foregroundColor(.gray)
+                                .padding(.horizontal)
+                        }
+                    }
                 }
-            }
-            .padding(.horizontal)
-            
-            TextEditor(text: $journalText)
-                .padding()
-                .background(Color.gray.opacity(0.2))
-            
-            HStack(spacing: 30) {
-                Button("Cancel") {
-                    // handle cancel action
+                .sheet(isPresented: $showingImagePicker) {
+                    CustomImagePicker(images: $images, sourceType: sourceType)
                 }
-                .padding()
-                .background(Color.gray)
-                .foregroundColor(.white)
-                .cornerRadius(8)
-                                    
-                Button("Submit") {
+                .sheet(item: $selectedImage) { selectedImage in
+                    VStack{
+                        Image(uiImage: selectedImage.image)
+                            .resizable()
+                            .scaledToFit()
+                            .padding()
+//                        Text(selectedImage.caption)
+                    }
+                }
+                
+
+                HStack{
+                    Button(action: {
+                        // Your action goes here
+                        print("Mic button tapped!")
+                    }) {
+                        Image(systemName: "mic.fill")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 22, height: 22)
+                            .padding()
+                            .background(Color.white)
+                            .foregroundColor(.purple)
+                            .clipShape(Circle())
+                    }
+                                
+                    Toggle("", isOn: $toggleOn)
+
+                    if toggleOn {
+                        Text("Public")
+                            .font(.subheadline)
+                    } else {
+                        Text("Private")
+                            .font(.subheadline)
+                    }
+                }
+                .padding(.horizontal)
+                
+                
+                ZStack{
+                    RoundedRectangle(cornerRadius: 20)
+                        .fill(Color.white)
+                        .overlay(RoundedRectangle(cornerRadius: 20).stroke(Color.theme.backgroundColor, lineWidth: 1))
                     
+                    ScrollView {
+                        TextEditor(text: $journalText)
+                            .scrollContentBackground(.hidden)
+                            .background(.white)
+                            .foregroundColor(.black)
+                            .padding(.all, 20)
+                    }
                 }
                 .padding()
-                .background(Color.blue)
-                .foregroundColor(.white)
-                .cornerRadius(8)
             }
+        }
+        .onTapGesture {
+            self.endEditing()
         }
     }
 }
@@ -175,6 +195,7 @@ struct JournalWriterView: View {
 
 
 struct CustomImagePicker: UIViewControllerRepresentable {
+        
     @Binding var images: [IdentifiableImage]
     @Environment(\.presentationMode) private var presentationMode
     var sourceType: ImagePickerSourceType = .photoLibrary
@@ -201,6 +222,8 @@ struct CustomImagePicker: UIViewControllerRepresentable {
         
         @StateObject private var huggingFaceAPIManager = HuggingFaceAPIManager()
 
+        @StateObject var imageManager = ImageManager()
+        
         var parent: CustomImagePicker
 
         init(_ parent: CustomImagePicker) {
@@ -209,10 +232,18 @@ struct CustomImagePicker: UIViewControllerRepresentable {
 
         func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {
             if let uiImage = info[UIImagePickerController.InfoKey.originalImage] as? UIImage {
-                var identifiableImage = IdentifiableImage(image: uiImage)
-                huggingFaceAPIManager.sendImageToEndpoint(originalImage: uiImage)
-                identifiableImage.caption = huggingFaceAPIManager.imageCaption
-                parent.images.append(identifiableImage)
+                imageManager.submitImageToFirebase(image: uiImage) { [weak self] result in
+                    switch result {
+                    case .success(let url):
+                        var identifiableImage = IdentifiableImage(image: uiImage, url: url)
+                        self?.huggingFaceAPIManager.sendImageToEndpoint(originalImage: uiImage)
+                        identifiableImage.caption = self?.huggingFaceAPIManager.imageCaption
+                        self?.parent.images.append(identifiableImage)
+                        
+                    case .failure(let error):
+                        print("Failed to upload image: \(error.localizedDescription)")
+                    }
+                }
             }
             parent.presentationMode.wrappedValue.dismiss()
         }
@@ -221,7 +252,11 @@ struct CustomImagePicker: UIViewControllerRepresentable {
 
 struct JournalWriterView_Previews: PreviewProvider {
     static var previews: some View {
-        JournalWriterView()
+        ForEach(ColorScheme.allCases, id: \.self) {
+            JournalHomeView().preferredColorScheme($0)
+                .environmentObject(JournalManager())
+
+        }
     }
 }
 

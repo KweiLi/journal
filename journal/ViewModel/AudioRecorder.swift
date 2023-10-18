@@ -18,7 +18,7 @@ class AudioRecorder: NSObject, ObservableObject {
     
     @Published var recordings = [Recording]()
     @Published var recording = false
-        
+    
     override init() {
         super.init()
         requestTranscriptionPermission()
