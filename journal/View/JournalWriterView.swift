@@ -1,17 +1,16 @@
 //
 //  JournalWriterView.swift
-//  journal
+//  AppJournal
 //
-//  Created by Kun Chen on 2023-10-03.
+//  Created by Kun Chen on 2023-08-17.
 //
 
 import SwiftUI
 
 struct IdentifiableImage: Identifiable {
-    var id = UUID()
-    var image: UIImage
-    var url: URL?
-    var caption: String?
+    let id = UUID()
+    let image: UIImage
+    var caption: String = ""
 }
 
 enum ImagePickerSourceType {
@@ -72,20 +71,14 @@ struct JournalWriterView: View {
                                             Image(uiImage: identifiableImage.image)
                                                 .resizable()
                                                 .scaledToFit()
-                                                .frame(width: 140)
+                                                .frame(height: 130)
                                                 .cornerRadius(8)
                                                 .onTapGesture {
                                                     selectedImage = identifiableImage
                                                 }
                                             Button(action: {
                                                 if let index = images.firstIndex(where: { $0.id == identifiableImage.id }) {
-                                                    imageManager.deleteImageFromFirebase(url: identifiableImage.url!) { error in
-                                                        if let error = error {
-                                                            print("Failed to delete image: \(error.localizedDescription)")
-                                                        } else {
-                                                            images.remove(at: index)
-                                                        }
-                                                    }
+                                                    images.remove(at: index)
                                                 }
                                             }) {
                                                 Image(systemName: "xmark.circle.fill")
@@ -194,8 +187,9 @@ struct JournalWriterView: View {
 
 
 
+
+
 struct CustomImagePicker: UIViewControllerRepresentable {
-        
     @Binding var images: [IdentifiableImage]
     @Environment(\.presentationMode) private var presentationMode
     var sourceType: ImagePickerSourceType = .photoLibrary
@@ -222,8 +216,6 @@ struct CustomImagePicker: UIViewControllerRepresentable {
         
         @StateObject private var huggingFaceAPIManager = HuggingFaceAPIManager()
 
-        @StateObject var imageManager = ImageManager()
-        
         var parent: CustomImagePicker
 
         init(_ parent: CustomImagePicker) {
@@ -232,18 +224,10 @@ struct CustomImagePicker: UIViewControllerRepresentable {
 
         func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {
             if let uiImage = info[UIImagePickerController.InfoKey.originalImage] as? UIImage {
-                imageManager.submitImageToFirebase(image: uiImage) { [weak self] result in
-                    switch result {
-                    case .success(let url):
-                        var identifiableImage = IdentifiableImage(image: uiImage, url: url)
-                        self?.huggingFaceAPIManager.sendImageToEndpoint(originalImage: uiImage)
-                        identifiableImage.caption = self?.huggingFaceAPIManager.imageCaption
-                        self?.parent.images.append(identifiableImage)
-                        
-                    case .failure(let error):
-                        print("Failed to upload image: \(error.localizedDescription)")
-                    }
-                }
+                var identifiableImage = IdentifiableImage(image: uiImage)
+                huggingFaceAPIManager.sendImageToEndpoint(originalImage: uiImage)
+                identifiableImage.caption = huggingFaceAPIManager.imageCaption
+                parent.images.append(identifiableImage)
             }
             parent.presentationMode.wrappedValue.dismiss()
         }
@@ -259,4 +243,3 @@ struct JournalWriterView_Previews: PreviewProvider {
         }
     }
 }
-
