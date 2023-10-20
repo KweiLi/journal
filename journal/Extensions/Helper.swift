@@ -16,3 +16,22 @@ func getFileDate(for file: URL) -> Date {
         return Date()
     }
 }
+
+
+struct Caption: Decodable {
+    let generated_text: String
+}
+
+func extractCaption(from jsonString: String) -> String? {
+    let data = Data(jsonString.utf8)
+    
+    do {
+        let captions = try JSONDecoder().decode([Caption].self, from: data)
+        return captions.first?.generated_text
+    } catch {
+        print("Error decoding JSON: \(error)")
+        return nil
+    }
+}
+
+

@@ -12,7 +12,7 @@ class HuggingFaceAPIManager: ObservableObject{
     
     @Published var imageCaption: String = ""
     
-    func sendImageToEndpoint(originalImage: UIImage) {
+    func sendImageToEndpoint(originalImage: UIImage, completion: @escaping (String?) -> Void) {
         var imageData: Data?
         var contentType: String
         
@@ -41,19 +41,21 @@ class HuggingFaceAPIManager: ObservableObject{
             let task = URLSession.shared.dataTask(with: request) { (data, response, error) in
                 if let error = error {
                     print("Error occurred: \(error.localizedDescription)")
+                    completion(nil)
                     return
                 }
 
                 if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode != 200 {
                     print("HTTP Error: \(httpResponse.statusCode)")
+                    completion(nil)
                     return
                 }
 
                 if let data = data, let resultString = String(data: data, encoding: .utf8) {
-                    self.imageCaption = resultString
-                    print("Response: \(resultString)")
+                    completion(resultString)  // Return the result
                 } else {
                     print("Failed to decode response")
+                    completion(nil)
                 }
             }
             
