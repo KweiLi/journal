@@ -146,6 +146,8 @@ struct JournalWriterView: View {
                 
                 JournalPublicToggleView(toggle: $toggleOn)
                     .padding(.horizontal)
+
+                
                 
                 ZStack{
                     RoundedRectangle(cornerRadius: 20)
@@ -167,7 +169,6 @@ struct JournalWriterView: View {
                                             )
                                             .cornerRadius(10)
                                             .frame(maxWidth: .infinity, alignment: .leading)
-
                                     }
                                 }
                             }
@@ -175,10 +176,12 @@ struct JournalWriterView: View {
                         .padding()
                         
                         TextEditor(text: $journalText)
+                            .font(.caption)
                             .scrollContentBackground(.hidden)
-                            .background(.white)
+                            .background(Color.green.opacity(0.3))
+                            .clipShape(RoundedRectangle(cornerRadius: 8))
                             .foregroundColor(.black)
-                            .padding(.all, 20)
+                            .padding()
                     }
                 }
                 .padding()
@@ -231,16 +234,6 @@ struct CustomImagePicker: UIViewControllerRepresentable {
             self.parent = parent
         }
 
-//        func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {
-//            if let uiImage = info[UIImagePickerController.InfoKey.originalImage] as? UIImage {
-//                var identifiableImage = IdentifiableImage(image: uiImage)
-//                huggingFaceAPIManager.sendImageToEndpoint(originalImage: uiImage)
-//                identifiableImage.caption = huggingFaceAPIManager.imageCaption
-//                parent.images.append(identifiableImage)
-//            }
-//            parent.presentationMode.wrappedValue.dismiss()
-//        }
-        
         func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {
             if let uiImage = info[UIImagePickerController.InfoKey.originalImage] as? UIImage {
                 parent.journalImages.append(uiImage)

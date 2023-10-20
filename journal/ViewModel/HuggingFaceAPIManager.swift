@@ -33,6 +33,7 @@ class HuggingFaceAPIManager: ObservableObject{
             
             // Prepare the URLRequest
             var request = URLRequest(url: URL(string: "https://api-inference.huggingface.co/models/Salesforce/blip-image-captioning-large")!)
+            
             request.httpMethod = "POST"
             request.httpBody = imageData
             request.addValue(contentType, forHTTPHeaderField: "Content-Type")
