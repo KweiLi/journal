@@ -8,9 +8,7 @@
 import SwiftUI
 
 struct OneLinerJounalContentView: View {
-    
-    @EnvironmentObject var journalManager: JournalManager
-    
+        
     let journalTags = ["Poetry", "Fitness", "Dream", "Accomplishment", "Gratitude"]
     let journalImages = ["poetryimage", "fitnessimage", "dreamimage", "accomplishmentimage", "gratitudeimage"]
     let journalExamplebyType: [String: String] = [
@@ -34,6 +32,10 @@ struct OneLinerJounalContentView: View {
     @State private var selectedTag: Int = 0
     @FocusState private var isTextFieldFocused: Bool
 
+    @Binding var journalText: String
+    @Binding var journalType: String
+    @Binding var journalPublishIndicator: Bool
+
     var body: some View {
         VStack{
             Text(Date(), style: .date)
@@ -51,7 +53,7 @@ struct OneLinerJounalContentView: View {
                     Button(action: {
                         if selectedTag > 0 {
                             selectedTag -= 1
-                            journalManager.currentJournal.type = journalTags[selectedTag]
+                            journalType = journalTags[selectedTag]
                         }
                     }) {
                         Image(systemName: "arrow.left")
@@ -85,13 +87,13 @@ struct OneLinerJounalContentView: View {
                                             // Swipe right
                                             if selectedTag > 0 {
                                                 selectedTag -= 1
-                                                journalManager.currentJournal.type = journalTags[selectedTag]
+                                                journalType = journalTags[selectedTag]
                                             }
                                         } else {
                                             // Swipe left
                                             if selectedTag < journalImages.count - 1 {
                                                 selectedTag += 1
-                                                journalManager.currentJournal.type = journalTags[selectedTag]
+                                                journalType = journalTags[selectedTag]
                                             }
                                         }
                                     }
@@ -103,7 +105,7 @@ struct OneLinerJounalContentView: View {
                     Button(action: {
                         if selectedTag < journalImages.count - 1 {
                             selectedTag += 1
-                            journalManager.currentJournal.type = journalTags[selectedTag]
+                            journalType = journalTags[selectedTag]
                         }
                     }) {
                         Image(systemName: "arrow.right")
@@ -122,12 +124,12 @@ struct OneLinerJounalContentView: View {
                     .disabled(selectedTag == journalImages.count - 1)
                 }
                 
-                JournalPublicToggleView(toggle: $journalManager.currentJournal.publishIndicator)
+                JournalPublicToggleView(toggle: $journalPublishIndicator)
                     .padding(.horizontal)
                 
                 ZStack(alignment: .leading) {
                     // The placeholder
-                    if journalManager.currentJournal.text.isEmpty && !isTextFieldFocused {
+                    if journalText.isEmpty && !isTextFieldFocused {
                         Text("\(journalExamplebyType[journalTags[selectedTag]] ?? "")")
                             .font(.footnote)
                             .foregroundColor(.gray) // Adjust this to the color you want
@@ -135,7 +137,7 @@ struct OneLinerJounalContentView: View {
                     }
 
                     // The actual TextField
-                    TextField("", text: $journalManager.currentJournal.text, axis: .vertical)
+                    TextField("", text: $journalText, axis: .vertical)
                         .focused($isTextFieldFocused)
                         .font(.footnote)
                         .foregroundColor(.black)

@@ -8,20 +8,23 @@
 import Foundation
 import SwiftUI
 
-
 struct Journal: Identifiable, Hashable, Codable {
     let id: String?
     var category = ""
     var title: String = ""
     var text: String = ""
     var date: Date = Date()
+    var styledDateString: String {
+        return styledDate(from: date)
+    }
     var type: String = ""
     var recordings: [Recording] = []
-    var imageUrls: [String] = []
+    var imageUrls: [URL] = []
     var imageCaptions: [String] = []
     var publishIndicator: Bool = false
     var liked: Int = 0
 }
+
 
 
 struct Recording: Identifiable, Equatable, Hashable, Codable {

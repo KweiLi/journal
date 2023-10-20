@@ -35,6 +35,10 @@ class JournalManager: ObservableObject {
             print("Error: \(error.localizedDescription)")
         }
     }
+    
+    func resetJournal(){
+        self.currentJournal = Journal(id: nil)
+    }
 
     // Upload multiple audio recordings to Firebase Storage
     private func uploadRecordings(_ fileURLs: [URL], completion: @escaping ([Recording]) -> Void) {

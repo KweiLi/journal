@@ -60,11 +60,18 @@ struct VoiceJournalView: View {
         .navigationBarItems(leading: Button(action: {
             self.presentationMode.wrappedValue.dismiss()
             
+            journalManager.resetJournal()
+            
             journalManager.currentJournal.title = "My Voice Journal"
             journalManager.currentJournal.category = "voice"
             journalManager.currentJournal.recordings = audioRecorderManager.recordings
+            journalManager.currentJournal.publishIndicator = toggleOn
             
-            journalManager.saveJournal(journal: journalManager.currentJournal)
+            if journalManager.currentJournal.recordings.isEmpty {
+                print("There are no recordings")
+            } else {
+                journalManager.saveJournal(journal: journalManager.currentJournal)
+            }
         }) {
             Image(systemName: "arrowshape.turn.up.backward")
         })

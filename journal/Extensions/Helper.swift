@@ -17,6 +17,12 @@ func getFileDate(for file: URL) -> Date {
     }
 }
 
+func styledDate(from date: Date) -> String {
+    let formatter = DateFormatter()
+    formatter.dateStyle = .long
+    formatter.timeStyle = .none
+    return formatter.string(from: date)
+}
 
 struct Caption: Decodable {
     let generated_text: String
@@ -33,5 +39,4 @@ func extractCaption(from jsonString: String) -> String? {
         return nil
     }
 }
-
 

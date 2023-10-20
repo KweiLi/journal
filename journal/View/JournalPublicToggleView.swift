@@ -14,8 +14,13 @@ struct JournalPublicToggleView: View {
     var body: some View {
         HStack {
             Spacer()
+            Spacer()
+
             Toggle("", isOn: $toggle)
                 .scaleEffect(0.7)
+            
+            Spacer()
+            
             if toggle {
                 Text("Public")
                     .font(.caption)
@@ -25,6 +30,10 @@ struct JournalPublicToggleView: View {
                     .font(.caption)
                     .foregroundColor(.black)
             }
+            
+            Spacer()
+            Spacer()
+
         }
     }
 }

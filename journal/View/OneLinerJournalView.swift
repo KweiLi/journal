@@ -18,31 +18,44 @@ struct OneLinerJournalView: View {
     @EnvironmentObject var journalManager: JournalManager
     @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
 
+    @State var journalText: String = ""
+    @State var journalType: String = ""
+    @State var journalPublishIndicator: Bool = false
+    
     var body: some View {
         
         ZStack{
             Color.white
                 .ignoresSafeArea()
+                .onTapGesture {
+                    self.endEditing()
+                }
+
             
             VStack {
                 JournalHeaderView(journalType: "One-Liner Journal", journalTypeDescription: "Capture the essence of your day in one sentence.")
                 
-                OneLinerJounalContentView()
-                .environmentObject(journalManager)
-            }
-            .onTapGesture {
-                self.endEditing()
+                OneLinerJounalContentView(journalText: $journalText, journalType: $journalType, journalPublishIndicator: $journalPublishIndicator)
             }
         }
-        .navigationBarTitle("Voice Journal", displayMode: .inline)
+        .navigationBarTitle("One-Liner Journal", displayMode: .inline)
         .navigationBarBackButtonHidden(true)
         .navigationBarItems(leading: Button(action: {
             self.presentationMode.wrappedValue.dismiss()
             
+            journalManager.resetJournal()
+            
             journalManager.currentJournal.title = "My One-Liner Journal"
             journalManager.currentJournal.category = "oneliner"
+            journalManager.currentJournal.text = journalText
+            journalManager.currentJournal.publishIndicator = journalPublishIndicator
+
+            if !journalText.isEmpty {
+                journalManager.saveJournal(journal: journalManager.currentJournal)
+            } else {
+                print("Text is empty.")
+            }
             
-            journalManager.saveJournal(journal: journalManager.currentJournal)
         }) {
             Image(systemName: "arrowshape.turn.up.backward")
         })

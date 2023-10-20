@@ -21,8 +21,10 @@ enum ImagePickerSourceType {
 
 struct JournalWriterView: View {
     
-    @StateObject var imageManager = ImageManager()
-    
+    @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
+
+    @EnvironmentObject var journalManager: JournalManager
+
     @State var journalImages:[UIImage] = []
     @State var journalImageCaptions:[String] = []
     @State var journalImageURLs:[URL] = []
@@ -146,8 +148,6 @@ struct JournalWriterView: View {
                 
                 JournalPublicToggleView(toggle: $toggleOn)
                     .padding(.horizontal)
-
-                
                 
                 ZStack{
                     RoundedRectangle(cornerRadius: 20)
@@ -175,10 +175,12 @@ struct JournalWriterView: View {
                         }
                         .padding()
                         
+                        Spacer()
+                        
                         TextEditor(text: $journalText)
                             .font(.caption)
                             .scrollContentBackground(.hidden)
-                            .background(Color.green.opacity(0.3))
+                            .background(Color.theme.backgroundColor)
                             .clipShape(RoundedRectangle(cornerRadius: 8))
                             .foregroundColor(.black)
                             .padding()
@@ -190,6 +192,29 @@ struct JournalWriterView: View {
         .onTapGesture {
             self.endEditing()
         }
+        .navigationBarTitle("Reflective Journal", displayMode: .inline)
+        .navigationBarBackButtonHidden(true)
+        .navigationBarItems(leading: Button(action: {
+            self.presentationMode.wrappedValue.dismiss()
+            
+            journalManager.resetJournal()
+            
+            journalManager.currentJournal.title = "My Reflective Journal"
+            journalManager.currentJournal.category = "reflective"
+            journalManager.currentJournal.text = journalText
+            journalManager.currentJournal.imageUrls = journalImageURLs
+            journalManager.currentJournal.imageCaptions = journalImageCaptions
+            journalManager.currentJournal.publishIndicator = toggleOn
+            
+            if journalManager.currentJournal.text.isEmpty && journalManager.currentJournal.imageUrls.isEmpty {
+                print("Journal is empty.")
+            } else {
+                journalManager.saveJournal(journal: journalManager.currentJournal)
+            }
+            
+        }) {
+            Image(systemName: "arrowshape.turn.up.backward")
+        })
     }
 }
 
