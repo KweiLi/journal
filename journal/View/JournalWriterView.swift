@@ -174,19 +174,29 @@ struct JournalWriterView: View {
                             }
                         }
                         .padding()
-                        
-                        Spacer()
-                        
-                        TextEditor(text: $journalText)
-                            .font(.caption)
-                            .scrollContentBackground(.hidden)
-                            .background(Color.theme.backgroundColor)
-                            .clipShape(RoundedRectangle(cornerRadius: 8))
-                            .foregroundColor(.black)
-                            .padding()
+//
+//                        Spacer()
+//
+//                        TextEditor(text: $journalText)
+//                            .font(.caption)
+//                            .scrollContentBackground(.hidden)
+//                            .background(Color.theme.backgroundColor)
+//                            .clipShape(RoundedRectangle(cornerRadius: 8))
+//                            .foregroundColor(.black)
+//                            .padding()
                     }
                 }
                 .padding()
+                
+                
+                TextEditor(text: $journalText)
+                    .font(.caption)
+                    .scrollContentBackground(.hidden)
+                    .background(Color.theme.backgroundColor)
+                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                    .foregroundColor(.black)
+                    .padding()
+            
             }
         }
         .onTapGesture {
