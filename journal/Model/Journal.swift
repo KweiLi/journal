@@ -9,7 +9,7 @@ import Foundation
 import SwiftUI
 
 struct Journal: Identifiable, Hashable, Codable {
-    let id: String?
+    var id: String?
     var category = ""
     var title: String = ""
     var text: String = ""
@@ -24,8 +24,6 @@ struct Journal: Identifiable, Hashable, Codable {
     var publishIndicator: Bool = false
     var liked: Int = 0
 }
-
-
 
 struct Recording: Identifiable, Equatable, Hashable, Codable {
     var id: String?

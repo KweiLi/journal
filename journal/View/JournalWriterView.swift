@@ -149,14 +149,19 @@ struct JournalWriterView: View {
                 JournalPublicToggleView(toggle: $toggleOn)
                     .padding(.horizontal)
                 
-                ZStack{
-                    RoundedRectangle(cornerRadius: 20)
-                        .fill(Color.white)
-                        .overlay(RoundedRectangle(cornerRadius: 20).stroke(Color.theme.backgroundColor, lineWidth: 1))
-                    
-                    ScrollView {
-                        VStack (alignment: .leading){
-                            if journalImageCaptions.count > 0{
+                TextEditor(text: $journalText)
+                    .frame(minHeight: 200)
+                    .padding()
+                    .font(.caption)
+                    .scrollContentBackground(.hidden)
+                    .background(Color.theme.backgroundColor)
+                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                    .foregroundColor(.black)
+                    .padding()
+                
+                if journalImageCaptions.count > 0 {
+                        ScrollView (.horizontal) {
+                            HStack (alignment: .top, spacing: 8) {
                                 ForEach(journalImageCaptions, id: \.self) { caption in
                                     if let extractedCaption = extractCaption(from: caption) {
                                         (Text("Observation: ").bold() + Text(extractedCaption))                  .font(.footnote)
@@ -172,31 +177,9 @@ struct JournalWriterView: View {
                                     }
                                 }
                             }
+                            .padding([.leading, .trailing, .bottom], 20)
                         }
-                        .padding()
-//
-//                        Spacer()
-//
-//                        TextEditor(text: $journalText)
-//                            .font(.caption)
-//                            .scrollContentBackground(.hidden)
-//                            .background(Color.theme.backgroundColor)
-//                            .clipShape(RoundedRectangle(cornerRadius: 8))
-//                            .foregroundColor(.black)
-//                            .padding()
-                    }
                 }
-                .padding()
-                
-                
-                TextEditor(text: $journalText)
-                    .font(.caption)
-                    .scrollContentBackground(.hidden)
-                    .background(Color.theme.backgroundColor)
-                    .clipShape(RoundedRectangle(cornerRadius: 8))
-                    .foregroundColor(.black)
-                    .padding()
-            
             }
         }
         .onTapGesture {

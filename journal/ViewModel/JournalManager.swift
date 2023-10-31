@@ -5,12 +5,16 @@
 //  Created by Kun Chen on 2023-10-03.
 //
 
+import Firebase
 import FirebaseFirestore
 import FirebaseFirestoreSwift
 import FirebaseStorage
 
 class JournalManager: ObservableObject {
     private var db = Firestore.firestore()
+    
+    private var lastDocumentSnapshot: DocumentSnapshot?
+    
     private var storage = Storage.storage().reference()
 
     @Published var currentJournal: Journal = Journal(id: nil)
@@ -100,4 +104,74 @@ class JournalManager: ObservableObject {
             completion(true)
         }
     }
+    
+    func fetchJournals(completion: @escaping (Result<[Journal], Error>) -> Void) {
+        
+        var query: Query = db.collection("journals").order(by: "date", descending: true).limit(to: 10)
+        if let lastDocument = lastDocumentSnapshot {
+            query = query.start(afterDocument: lastDocument)
+        }
+        
+        query.getDocuments { (querySnapshot, err) in
+            if let err = err {
+                print("Error getting documents: \(err)")
+                completion(.failure(err))
+            } else {
+                var journals = [Journal]()
+                for document in querySnapshot!.documents {
+                    let data = document.data()
+                    
+                    let id = document.documentID
+                    let category = data["category"] as? String ?? ""
+                    let title = data["title"] as? String ?? ""
+                    let text = data["text"] as? String ?? ""
+                    
+                    // Convert Firestore timestamp to Date
+                    let timestamp = data["date"] as? Timestamp
+                    let date = timestamp?.dateValue() ?? Date()
+                    
+                    let type = data["type"] as? String ?? ""
+                    let publishIndicator = data["publishIndicator"] as? Bool ?? false
+                    let liked = data["liked"] as? Int ?? 0
+
+                    // Decode recordings
+                    var recordings: [Recording] = []
+                    if let recordingData = data["recordings"] as? [[String: Any]] {
+                        for recordingDict in recordingData {
+                            if let fileURLString = recordingDict["fileURL"] as? String,
+                               let fileURL = URL(string: fileURLString),
+                               let createdAtTimestamp = recordingDict["createdAt"] as? Double {
+                                let createdAt = Date(timeIntervalSince1970: createdAtTimestamp)
+                                let transcription = recordingDict["transcription"] as? String
+                                let duration = recordingDict["duration"] as? TimeInterval
+                                let localURLString = recordingDict["localURL"] as? String
+                                let localURL = URL(string: localURLString ?? "")
+                                let recording = Recording(id: recordingDict["id"] as? String, fileURL: fileURL, localURL: localURL, createdAt: createdAt, transcription: transcription, duration: duration)
+                                print(recording)
+                                recordings.append(recording)
+                            } else {
+                                print("Failed to parse recording: \(recordingDict)")
+                            }
+                        }
+                    }
+                    
+                    // Decode image URLs
+                    let imageUrls: [URL] = (data["imageUrls"] as? [String])?.compactMap(URL.init) ?? []
+                    let imageCaptions = data["imageCaptions"] as? [String] ?? []
+                    
+                    let journal = Journal(id: id, category: category, title: title, text: text, date: date, type: type, recordings: recordings, imageUrls: imageUrls, imageCaptions: imageCaptions, publishIndicator: publishIndicator, liked: liked)
+                    
+                    journals.append(journal)
+                }
+                
+                if let lastDocument = querySnapshot?.documents.last {
+                    self.lastDocumentSnapshot = lastDocument
+                }
+
+                completion(.success(journals))
+            }
+        }
+    }
+
+
 }

@@ -18,10 +18,6 @@ struct JournalHomeView: View {
                 
                 VStack(spacing: 20) {
                     
-                    Text("Select Jounal Type")
-                        .bold()
-                        .foregroundColor(.black)
-                    
                     JournalCard(
                             title: "One Liner",
                             description: "quick daily reflections and build mindfulness",
@@ -45,6 +41,23 @@ struct JournalHomeView: View {
                 }
                 .padding()
             }
+            .navigationTitle("Select Jounal Type")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .principal) {
+                    Text("Select Jounal Type")
+                        .foregroundColor(.black)
+                        .bold()
+                }
+            }
+            .navigationBarItems(
+                trailing:
+                    NavigationLink(destination: {
+                        JournalListView()
+                    }, label: {
+                        Image(systemName: "doc.append")
+                            .foregroundColor(.purple)
+                    }))
         }
     }
 }
