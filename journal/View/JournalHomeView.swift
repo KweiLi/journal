@@ -10,10 +10,8 @@ import SwiftUI
 struct JournalHomeView: View {
     var body: some View {
         NavigationView {
-            
             ZStack{
-                
-                Color.theme.backgroundColor
+                Color.white
                     .ignoresSafeArea()
                 
                 VStack(spacing: 20) {

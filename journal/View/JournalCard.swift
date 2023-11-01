@@ -24,39 +24,46 @@ struct JournalCard<Destination: View>: View {
     
     var body: some View {
         NavigationLink(destination: destination) {
-            VStack{
-                Spacer()
-                HStack(spacing: 20) {
-                    Image(image)
-                        .resizable()
-                        .frame(width: 100, height: 100)
-                        .cornerRadius(20)
-                    
-                    VStack(alignment: .leading, spacing: 15){
-                        Text(title)
-                            .font(.headline)
-                            .foregroundColor(.black)
-                            .fontWeight(.bold)
+            
+            ZStack{
+                RoundedRectangle(cornerRadius: 20)
+                    .fill(Color.white)
+                    .overlay(RoundedRectangle(cornerRadius: 20).stroke(Color.theme.backgroundColor, lineWidth: 1))
+                
+                VStack{
+                    Spacer()
+                    HStack(spacing: 20) {
+                        Image(image)
+                            .resizable()
+                            .frame(width: 100, height: 100)
+                            .cornerRadius(20)
                         
-                        Text(description)
-                            .font(.footnote)
-                            .foregroundColor(.black)
-                            .multilineTextAlignment(.leading)
+                        VStack(alignment: .leading, spacing: 15){
+                            Text(title)
+                                .font(.headline)
+                                .foregroundColor(.black)
+                                .fontWeight(.bold)
+                            
+                            Text(description)
+                                .font(.footnote)
+                                .foregroundColor(.black)
+                                .multilineTextAlignment(.leading)
+                        }
                     }
+                    Spacer()
                 }
-                Spacer()
+                .padding()
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding([.trailing,.leading], 20)
-            .foregroundColor(Color(hue: 0.656, saturation: 0.787, brightness: 0.354))
-            .background(Color.theme.cardBackgroundColor)
-            .cornerRadius(20)
         }
     }
 }
 
 struct JournalCard_Previews: PreviewProvider {
     static var previews: some View {
-        JournalHomeView()
+        ForEach(ColorScheme.allCases, id: \.self) {
+            JournalHomeView().preferredColorScheme($0)
+                .environmentObject(JournalManager())
+
+        }
     }
 }
