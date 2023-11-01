@@ -6,49 +6,62 @@
 //
 
 import SwiftUI
+import Firebase
 
 struct JournalListView: View {
-    
     @EnvironmentObject var journalManager: JournalManager
     
     @State private var journals = [Journal]()
+    @State private var isLoading = false
+    @State private var lastDocumentSnapshot: DocumentSnapshot? = nil
     @State private var error: Error?
-    
+
     var body: some View {
         NavigationView {
             ScrollView {
-                VStack{
+                VStack {
                     ForEach(journals.indices, id: \.self) { index in
                         JournalListCardView(journal: $journals[index])
                             .onAppear {
-                                if self.journals.last == journals[index] {
-                                    self.fetchJournals()
+                                if index == journals.count - 1 && !isLoading {
+                                    fetchJournals()
                                 }
                             }
                     }
+                    
+                    if isLoading {
+                        ProgressView()
+                    }
                 }
+                .padding()
             }
             .navigationTitle("Journals")
             .navigationBarTitleDisplayMode(.inline)
             .onAppear {
-                fetchJournals()
+                if journals.isEmpty {
+                    fetchJournals()
+                }
             }
         }
     }
     
     func fetchJournals() {
-        let firebaseManager = JournalManager()
-        firebaseManager.fetchJournals { result in
+        isLoading = true
+        
+        journalManager.fetchJournals(startingAfter: lastDocumentSnapshot) { result in
+            isLoading = false
+
             switch result {
-            case .success(let journals):
-                self.journals = journals
+            case .success((let journals, let lastDocumentSnapshot)):
+                self.journals.append(contentsOf: journals)
+                self.lastDocumentSnapshot = lastDocumentSnapshot
             case .failure(let error):
-                self.error = error
                 print(error.localizedDescription)
             }
         }
     }
 }
+
 
 struct JournalListCardView: View {
     

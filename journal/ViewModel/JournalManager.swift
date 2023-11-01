@@ -105,20 +105,21 @@ class JournalManager: ObservableObject {
         }
     }
     
-    func fetchJournals(completion: @escaping (Result<[Journal], Error>) -> Void) {
-        
-        var query: Query = db.collection("journals").order(by: "date", descending: true).limit(to: 10)
-        if let lastDocument = lastDocumentSnapshot {
+    func fetchJournals(startingAfter lastDocumentSnapshot: DocumentSnapshot? = nil, completion: @escaping (Result<([Journal], DocumentSnapshot?), Error>) -> Void) {
+
+        var query: Query = db.collection("journals").order(by: "date", descending: true).limit(to: 5)
+        if let lastDocument = lastDocumentSnapshot ?? self.lastDocumentSnapshot {
             query = query.start(afterDocument: lastDocument)
+            print("Starting after document: \(lastDocument.documentID)")
         }
-        
+
         query.getDocuments { (querySnapshot, err) in
             if let err = err {
                 print("Error getting documents: \(err)")
                 completion(.failure(err))
-            } else {
+            } else if let querySnapshot = querySnapshot, !querySnapshot.documents.isEmpty {
                 var journals = [Journal]()
-                for document in querySnapshot!.documents {
+                for document in querySnapshot.documents {
                     let data = document.data()
                     
                     let id = document.documentID
@@ -127,9 +128,9 @@ class JournalManager: ObservableObject {
                     let text = data["text"] as? String ?? ""
                     
                     // Convert Firestore timestamp to Date
-                    let timestamp = data["date"] as? Timestamp
-                    let date = timestamp?.dateValue() ?? Date()
-                    
+                    let timestampDouble = data["date"] as? Double ?? 0.0
+                    let date = Date(timeIntervalSince1970: timestampDouble)
+
                     let type = data["type"] as? String ?? ""
                     let publishIndicator = data["publishIndicator"] as? Bool ?? false
                     let liked = data["liked"] as? Int ?? 0
@@ -147,7 +148,6 @@ class JournalManager: ObservableObject {
                                 let localURLString = recordingDict["localURL"] as? String
                                 let localURL = URL(string: localURLString ?? "")
                                 let recording = Recording(id: recordingDict["id"] as? String, fileURL: fileURL, localURL: localURL, createdAt: createdAt, transcription: transcription, duration: duration)
-                                print(recording)
                                 recordings.append(recording)
                             } else {
                                 print("Failed to parse recording: \(recordingDict)")
@@ -164,11 +164,14 @@ class JournalManager: ObservableObject {
                     journals.append(journal)
                 }
                 
-                if let lastDocument = querySnapshot?.documents.last {
-                    self.lastDocumentSnapshot = lastDocument
-                }
+                let lastDocumentSnapshot = querySnapshot.documents.last
+                self.lastDocumentSnapshot = lastDocumentSnapshot
+                
+                completion(.success((journals, lastDocumentSnapshot)))
+            } else {
+                print("No documents found")
+                completion(.success(([], nil)))
 
-                completion(.success(journals))
             }
         }
     }
